@@ -50,6 +50,7 @@ but let's go over goals and non-goals.
 Goals:
 
 - ESM-like modules
+- JS-like async
 - Rust-like syntax
 - Rust-like types
 - Macros
