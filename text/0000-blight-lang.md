@@ -1,8 +1,7 @@
 - Feature Name: The Blight Programming Language
 - Start Date: 2023-11-03
 - RFC PR: [blight-js/rfcs#0000](https://github.com/blight-js/rfcs/pull/1)
-- Blight Issue:
-  [blight-js/blight#0000](https://github.com/blight-js/blight/issues/1)
+- Blight Issue: https://github.com/blight-js/blight/issues/1
 
 # Summary
 
