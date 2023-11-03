@@ -19,6 +19,8 @@ browsers through traditional means, so until we get a big enough community to
 back us entering browsers by default, we will happily transpile all Blight code
 to Javascript that can run on the server or in the browser.
 
+TLDR; Blight is Typescript 2, inspired by Rust syntax and semantics.
+
 # Motivation
 
 [motivation]: #motivation
