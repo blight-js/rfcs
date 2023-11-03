@@ -31,13 +31,12 @@ happen.
 
 To be very clear, we do not plan on having any ecosystem to begin. An attack
 strategy is being devised to get around that. We do want to support some sort of
-interface with JavaScript and we plan to do that through unsafe blocks (this
-will be detailed in a later proposal).
+interface with JavaScript and we plan to do that in a future proposal.
 
 In the best timeline, once we get the compiler up and running, we are able to
 create a runtime pretty fast and kick off a hackathon to get an ecosystem
 running. If we get some key members of the JS community together, we may be able
-to get most of the core neccessary modules done pretty fast.
+to get most of the core necessary modules done pretty fast.
 
 # Guide-level explanation
 
@@ -52,17 +51,17 @@ Goals:
 - ESM-like modules
 - JS-like async
 - Rust-like syntax
-- Rust-like types
 - Macros
 - Transpiles to JS
-- Fast to compile and alright to run
+- Fast to compile and produces relatively fast JS
 - Standard library to interact with raw JS APIs safely
 - Zig-like "safe-but-slow" debug build and "fast-but-has-UB" production build
 
-Non-Goals (for now)
+Non-Goals
 
-- Support for any JS libraries outside of unsafe wrappers
-- Compile to standalone executable
+- Support for any JS libraries outside of wrappers (would just be a worse
+  Typescript)
+- Compile to standalone executable (we'd just be writing Rust again)
 
 # Reference-level explanation
 
@@ -90,7 +89,7 @@ the wrong move:
 
 Maybe starting from scratch with no ecosystem is the wrong play. I could be
 entirely wrong about this. Deno regretted starting from scratch and there is a
-strong likelyhood we will be in the same boat. If we can weather the storm, the
+strong likelihood we will be in the same boat. If we can weather the storm, the
 waters look much clearer on the other side.
 
 # Rationale and alternatives
@@ -105,11 +104,11 @@ right move here.
 
 I have considered (and gotten decently far) at implementing alternative runtimes
 for Javascript. I thought that maybe it was an API-level issue, but it's simply
-not. At a fundamental language level, Javasript is broken. It is unsafe. It is a
-footgun.
+not. At a fundamental language level, Javascript is broken. It is unsafe. It is
+a footgun.
 
 Not doing this would leave the world in the same state as it is today. Being a
-web developer is seen as a nightmare because no one knows the idiosyncracies of
+web developer is seen as a nightmare because no one knows the idiosyncrasies of
 Javascript. Except me. And maybe like... ten other people who really care.
 
 # Prior art
@@ -147,7 +146,7 @@ aligned with everyone who is working on this project. This isn't set in stone.
 Let's build a language we all want to use, and let's build it together!
 
 Just off of the top of my head, the following RFCs need to be made at some
-point:
+point. All of these are unspec'd and may not even end up in the final language:
 
 - How do native types work? Do we want something stricter or something looser?
 - How do modules work?
