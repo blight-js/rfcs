@@ -56,6 +56,7 @@ Goals:
 - Transpiles to JS
 - Fast to compile and alright to run
 - Standard library to interact with raw JS APIs safely
+- Zig-like "safe-but-slow" debug build and "fast-but-has-UB" production build
 
 Non-Goals (for now)
 
