@@ -1,8 +1,7 @@
 - Feature Name: (fill me in with a unique ident, `my_awesome_feature`)
 - Start Date: (fill me in with today's date, YYYY-MM-DD)
 - RFC PR: [blight-js/rfcs#0000](https://github.com/blight-js/rfcs/pull/0000)
-- Blight Issue:
-  [blight-js/blight#0000](https://github.com/blight-js/blight/issues/0000)
+- Blight Issue: https://github.com/blight-js/blight/issues/0000
 
 # Summary
 
