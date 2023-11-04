@@ -191,16 +191,16 @@ Examples of invalid numeric literals:
 
 Numeric literals do not have explicit types when in expressions, but rather adapt to the runtime-known types. This works exactly how [Zig's `comptime_int` type](https://ziglang.org/documentation/master/#toc-Runtime-Integer-Values) works (the type of integer literals), but this RFC does not give this type an observable name.
 
-For example, if a variable of type `u32` named `x` existed, and the following code was run:
-
-```blight
-x + 512
+```
+var x: u32 = 512
+// `512` becomes a u32 based on the type of `x`
 ```
 
-`512` is widened to a u32. If the rhs was larger than `u32.max`, then this would be a compile error. Explicit widening of `x` is needed.
+Literals that do not fit in the result type will cause a compile error.
 
 ```
-x.to(u64) + u32.max + 123
+var x: u32 = -2
+// compile error: cannot coerce `-2` to `u32`
 ```
 
 You cannot use [unary `~`](#integer-arithmetic) on an integer literal, it must be given a type, such as:
@@ -246,6 +246,18 @@ var x: u32 = 5 / 0
 ## Widening during arithmetic
 
 When integers of different sizes are used in arithmetic, the compiler will widen the smaller integer to the larger integer.
+
+For example, if a variable of type `u32` named `x` existed, and the following code was run:
+
+```blight
+x + 512
+```
+
+`512` is widened to a u32. If the rhs was larger than `u32.max`, then this would be a compile error. Explicit widening of `x` is needed.
+
+```
+x.to(u64) + u32.max + 123
+```
 
 ## Changes to Identifiers
 
