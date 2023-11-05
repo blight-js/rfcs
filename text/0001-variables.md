@@ -88,15 +88,52 @@ Javascript. This is more like "let" than "var".
 
 [reference-level-explanation]: #reference-level-explanation
 
-This is the technical portion of the RFC. Explain the design in sufficient
-detail that:
+## Variable declaration
+Declaring a variable looks like the following regex.
 
-- Its interaction with other features is clear.
-- It is reasonably clear how the feature would be implemented.
-- Corner cases are dissected by example.
+```regex
+let\s*(mut\s)?(.+?)(:\s*(.+?))?\s*=\s*(.+)\s*;
+```
 
-The section should return to the examples given in the previous section, and
-explain more fully how the detailed proposal makes those examples work.
+in perhaps a more readable (but completely made up) IDL:
+
+```idl
+let (mut)? <variable_name> (: <type>)? = <value>;
+```
+
+Valid types and values will not be discussed in this proposal. They should be discussed in future proposals.
+
+## Variable naming
+
+Variable names are any valid [unicode identifiers](https://unicode.org/reports/tr31/) or [emoji](https://www.unicode.org/Public/15.1.0/ucd/emoji/emoji-data.txt). They may not start with a number, contain whitespace, or contain any of the following characters as they are reserved for future language use: "'<>(){}[]\|/?,.=+-~`!@#$%^&*
+
+## Variable scope
+
+Variables are scoped to the block they are declared in. Blocks have not been specified yet, but they will be in a future proposal. This means that variables declared in a block will not be accessible outside of that block.
+
+## Variable shadowing
+
+Variables can be shadowed. This means that a variable can be declared with the same name as a variable in a parent scope. This is not an error.
+
+## Variable mutability
+
+Variables can be mutable or immutable. Immutable variables cannot be reassigned. Mutable variables can be reassigned. This is the only difference between the two.
+
+Mutable variables are declared with the `mut` keyword. Immutable variables are declared without the `mut` keyword. Variable reassigning follows the following syntax:
+
+```regex
+(.+?)\s*=\s*(.+)\s*;
+```
+
+in perhaps a more readable (but completely made up) IDL:
+
+```idl
+<variable_name> = <value>;
+```
+
+## Variable inlining
+
+Variables can be inlined. This means that the variable will be replaced with its value at compile time. This is an optimization that can be done by the compiler. This is not a guarantee, but it is a possibility.
 
 # Drawbacks
 
@@ -106,6 +143,8 @@ Maybe there's a universe where Blight is a functional language with no need for
 silly primitives like state, but it's not this universe. Variables are
 necessary for any good programming language.
 
+Some people have expressed disinterest for the `let mut` syntax, but we have debated for a long time and nothing else seems to fit. `mut` as a modifier is the best way to go, and plays nicely with other proposals that may come up in the future.
+
 # Rationale and alternatives
 
 [rationale-and-alternatives]: #rationale-and-alternatives
@@ -114,8 +153,7 @@ I believe this is the best design for variables in a modern programming
 language. Explicitness is actually a friend and not a foe in this specific case.
 So many bugs come down to modifying a variable that you thought was static.
 
-The actual syntax is just what I prefer at the time of writing, there are a lot
-of alternatives discussed in the prior art section.
+If we don't use the `mut` keyword now, we would have to invent it down the line anyways. I think we should just get it over with now.
 
 # Prior art
 
@@ -183,3 +221,19 @@ Lots of future stuff for variables to expand out in future proposals:
 - Variable referencing + dereferencing
 - Specifying types
 - Integration with potential language primitives (iterators?)
+
+The key part of this proposal that extends out in the future is the `mut` keyword. I could easily imagine object and list destructuring:
+
+```blight
+let (x, y, mut z)= <value>;
+```
+
+I could also easily imagine a future with mutable arguments to functions
+
+```blight
+fn foo(mut x: <type>) {
+	x = <value>;
+}
+```
+
+Other keywords do not make sense in my opinion.
