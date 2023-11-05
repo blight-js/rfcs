@@ -46,7 +46,9 @@ All integer values can use property access notation to access built-in propertie
 
 - `val.to(T)`: Converts the integer's value to a the given type. T can be
   - `f64`, which it will convert the value to a [floating point number](#floats)
-  - Another Integer type like `u8`, which it will convert the value to that type. It is undefined behavior if this integer is out of range of `T.min`..`T.max`.
+  - Another Integer type like `u8`, which it will convert the value to that type.
+    - It is safety checked undefined behavior if this integer is out of range of `T.min`..`T.max`.
+- `val.truncate(T)`: Converts the integer's value to a the given type by truncating data away.
 - `val.pow(y)`: Raise this integer to the power of `y`.
 
 If the integer is a signed integer, the following methods are available:
@@ -103,8 +105,8 @@ There is one floating point type: `f64`, which is a 64-bit floating point that f
 
 `f64` has built in properties. These are accessed by using property access notation.
 
-- `f64.min`: Constant `1.7976931348623157e+308`
-- `f64.max`: Constant `5e-324`
+- `f64.min`: Constant `5e-324`
+- `f64.max`: Constant `1.7976931348623157e+308`
 - `f64.inf`: Constant `Infinity`
 
 ## Built-in Properties on Float Values
@@ -112,7 +114,7 @@ There is one floating point type: `f64`, which is a 64-bit floating point that f
 Similarly to integers, floats have built-in properties and methods. The variable name `val` is a placeholder for the float value used.
 
 - `val.to(T)`: Converts the float's value to a the given type. T can be
-  - An integer type like `u8`, which it will convert the value to that type, rounding the float if needed.
+  - An integer type like `u8`, which it will convert the value to that type.
     - It is safety-checked undefined behavior if the float is out of range of `T.min`..`T.max`.
     - It is safety-checked undefined behavior if the float is not an integer.
   - `f64`, which it will do nothing.
@@ -121,6 +123,7 @@ Similarly to integers, floats have built-in properties and methods. The variable
 - `val.ceil()`: Round this float up to the nearest integer, while keeping it a float.
 - `val.pow(y)`: Raise this float to the power of `y`.
   - It is safety-checked undefined behavior to call `1.pow(f64.inf)`.
+  - `0.pow(0)` is `1`.
 - `val.sqrt()`: Get the square root of this float.
   - It is safety-checked undefined behavior if the value is negative.
 - `val.abs()`: Get the absolute value of this float.
@@ -207,7 +210,7 @@ You cannot use [unary `~`](#integer-arithmetic) on an integer literal, it must b
 
 ```blight
 ~512 // compile error: cannot infer type of constant numeric literal
-     // hint: unary operator '~' needs a result type
+     // hint: unary operator '~' must operate on an integer of known width
 
 ~512.to(u32) // ok
 ```
@@ -231,10 +234,31 @@ Expressions that contain only numeric literals must be evaluated at compile time
 ```blight
 var x: u32 = (2.5 + 2.5) / 5
 // valid as `1` can coerce to `u32`
-
-var x: u32 = 5 / 6
-// compile error: cannot coerce `0.8333333333333334` to `u32`
 ```
+
+The implementation logic of the type resolver is as follows:
+
+1. Calculate LHS `(2.5 + 2.5)`
+   1. LHS is a numeric literal `2.5`, which is internally represented as the float `2.5`
+   2. RHS is a numeric literal `2.5`, which is internally represented as the float `2.5`
+   3. Since both sides are compile-time known, this expression evaluates to the numeric literal `5`, internally represented by the float `5.0`
+2. Calculate RHS
+   1. It is a numeric literal `5`, which is internally represented as the integer `5`
+3. Since both sides are compile-time known, this can be evaluated at compile time.
+   1. The left hand side is internally a float, this causes the right hand side to be converted to the float `5.0`
+   2. The division is excuted for the result
+4. Assign numeric literal `5.0` to the variable `x`, which requires type `u32`
+   1. The numeric literal, despite being represented by the float, can be coerced to the result integer type.
+   2. `x` is given the `u32` value `1`
+
+Converting between floats and integers at compile time is OK, as long as the final result of the calculate can be coerced into the result type. When a numeric literal with decimal point tries to coerce to an integer, it will be a compile error.
+
+```
+var x: u32 = 5 / 6
+// compile error: compile time numeric `0.8333333333333334` cannot coerce to `u32`
+```
+
+This is better for the developer and easier to implement than looking at the type `u32` and forcing all constants to be of that type, as it still would be a compile error.
 
 If undefined behavior is caused by a constant expression, it is a compile error.
 
@@ -250,14 +274,40 @@ When integers of different sizes are used in arithmetic, the compiler will widen
 For example, if a variable of type `u32` named `x` existed, and the following code was run:
 
 ```blight
-x + 512
+var x: u32 = ...
+var x: u16 = ...
+x + y
 ```
 
-`512` is widened to a u32. If the rhs was larger than `u32.max`, then this would be a compile error. Explicit widening of `x` is needed.
+During the addition, `y` is widened to a `u32` to match the type of the larger size int `x`. It can be thought of an implicit `.to(u32)`
 
+```blight
+x + y.to(u32)
 ```
-x.to(u64) + u32.max + 123
+
+Another case where this happens:
+
+```blight
+var y = x.to(u64) + u32.max + 123
 ```
+
+To break down exactly how the type resolution happens here:
+
+1. Calculate the type for the first addition:
+1. The types of the operands are calculated
+
+   - `x.to(u64)` is a `u64`
+   - `u32.max` is a `u32`
+
+1. Widening of the smaller type to match the larger type, the expression is rewritten as `x.to(u64) + u32.max.to(u64)`
+1. Repeat this process on the resulting `u64` for the second addition
+1. The types of the operands are calculated
+
+   - `x.to(u64) + u32.max.to(u64)` is a `u64`
+   - `123` is an numeric literal, it gets assigned a type of `u64`
+
+1. The types are the same size, so it is okay.
+1. It is rewritten such like `(x.to(u64) + u32.max.to(u64)) + 123.to(u64)`
 
 ## Changes to Identifiers
 
@@ -277,7 +327,7 @@ Spec compliant bit-shifting is not trivial to implement, it involves preserving 
 
 ## Compiling arithmetic safety checks
 
-Saftey checks can be implemented somewhat trivially using a single temporary variable. This can be left as a global. It is unfortunate that so much code, as safety checks off allow this to compile to 3 characters.
+Saftey checks can be implemented somewhat trivially using a single temporary variable. This can be left as a global. It is unfortunate that so much code is needed to compile this with saftey checks, as with them disabled it allows this to compile to 3 characters.
 
 > [!NOTE]
 > Blight does not yet have an decided assignment operator or variable system, `=` will be used as such in this example.
@@ -465,9 +515,9 @@ To keep the scope down, this RFC does not address these literals. Currently, all
 
 ## More Methods
 
-Later on, it will be cool to add more properties / methods to the integer types, such as `i32.parse(str)`. Exactly how this would compile is not clear at the moment, as `parseInt` is a weird API that we may not want to expose as-is. The integer value can contain methods like `.string()` and others.
+Later on, it will be cool to add more properties / methods to the integer types, such as `i32.parse(str)`. Exactly how this would compile is not clear at the moment, as `parseInt` is a weird API that we may not want to expose as-is. The integer value can contain methods like `.toFixed(n)` and others.
 
-We should also, at some point, expose ways to use the raw JS operators on `float` types.
+We should also, at some point, expose ways to use some of the raw JS operators on `float` types. There may be some instances someone would like to use some the JS operators directly, primarily the bit shifting ones like `^` on floating point numbers. It could be exposed on as `(5.2).lshiftInt(n)` which is defined to return an `i32`.
 
 ## Comparison operators
 
