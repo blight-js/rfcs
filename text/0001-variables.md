@@ -23,23 +23,21 @@ state will allow for future work around variable semantics.
 
 [guide-level-explanation]: #guide-level-explanation
 
-This proposal adds variables to the language. There are two types of variables
-in Blight: mutable and immutable variables.
+This proposal adds variables to the language. Variables are a way to store state between operations.
 
-Immutable variables store some state which will remain constant forever (in
-other words, deeply immutable). Immutable variables may be inligned for
-optimization purposes. Let's look at an example of immutable variables in the
-context of Blight:
+This RFC only defines immutable variables. All immutable values are deeply immutable. Syntax for mutable variables may be defined in a future RFC.
+
+
+Let's look at an example of variables in the context of Blight:
 
 ```blight
 let <variable_name>: <type> = <value>;
 ```
 
-i.e.
+i.e. with an example type of "u8" and an example value of "10"
 
 ```blight
-let x: <type> = <value>;
-x = <value2>; // Error: Cannot reassign immutable variable
+let x: u8 = 10;
 ```
 
 The type and value stored inside of variables will be defined in a future
@@ -65,14 +63,6 @@ let >greentext: <type> = <value>; // Error: Invalid variable name ">greentext" (
 let "variable_name": <type> = <value>; // Error: Invalid variable name ""variable_name"" (contains disallowed character """)
 ```
 
-The second type of variable has exactly the same semantics except that they are
-reassignable. The syntax looks like:
-
-```blight
-let mut x: <type> = <value>;
-x = <value2>; // no error!
-```
-
 In Blight, variables are able to be shadowed. In some languages this is an error
 (include Javascript), but here it is not:
 
@@ -92,13 +82,13 @@ Javascript. This is more like "let" than "var".
 Declaring a variable looks like the following regex.
 
 ```regex
-let\s*(mut\s)?(.+?)(:\s*(.+?))?\s*=\s*(.+)\s*;
+let\s+(.+?)\s*=\s*(.+);
 ```
 
 in perhaps a more readable (but completely made up) IDL:
 
 ```idl
-let (mut)? <variable_name> (: <type>)? = <value>;
+let <variable_name> (: <type>)? = <value>;
 ```
 
 Valid types and values will not be discussed in this proposal. They should be discussed in future proposals.
@@ -113,23 +103,11 @@ Variables are scoped to the block they are declared in. Blocks have not been spe
 
 ## Variable shadowing
 
-Variables can be shadowed. This means that a variable can be declared with the same name as a variable in a parent scope. This is not an error.
+Variables can be shadowed. This means that a variable can be declared with the same name as a variable in a parent scope. This is not an error. See the guide-level explanation for more information.
 
 ## Variable mutability
 
-Variables can be mutable or immutable. Immutable variables cannot be reassigned. Mutable variables can be reassigned. This is the only difference between the two.
-
-Mutable variables are declared with the `mut` keyword. Immutable variables are declared without the `mut` keyword. Variable reassigning follows the following syntax:
-
-```regex
-(.+?)\s*=\s*(.+)\s*;
-```
-
-in perhaps a more readable (but completely made up) IDL:
-
-```idl
-<variable_name> = <value>;
-```
+Variables currently are only immutable. This means that once a variable is declared, it cannot be changed. This is a design decision that may be changed in a future RFC.
 
 ## Variable inlining
 
@@ -143,8 +121,6 @@ Maybe there's a universe where Blight is a functional language with no need for
 silly primitives like state, but it's not this universe. Variables are
 necessary for any good programming language.
 
-Some people have expressed disinterest for the `let mut` syntax, but we have debated for a long time and nothing else seems to fit. `mut` as a modifier is the best way to go, and plays nicely with other proposals that may come up in the future.
-
 # Rationale and alternatives
 
 [rationale-and-alternatives]: #rationale-and-alternatives
@@ -152,8 +128,6 @@ Some people have expressed disinterest for the `let mut` syntax, but we have deb
 I believe this is the best design for variables in a modern programming
 language. Explicitness is actually a friend and not a foe in this specific case.
 So many bugs come down to modifying a variable that you thought was static.
-
-If we don't use the `mut` keyword now, we would have to invent it down the line anyways. I think we should just get it over with now.
 
 # Prior art
 
@@ -202,8 +176,7 @@ const x = 10;
 var x = 10;
 ```
 
-All of these are fine, but I think having immutability be the default and then
-enabling mutability if needed is a better way of thinking about programming.
+We choose to follow Rust and Swift in this case for immutable variables.
 
 # Unresolved questions
 
@@ -221,19 +194,5 @@ Lots of future stuff for variables to expand out in future proposals:
 - Variable referencing + dereferencing
 - Specifying types
 - Integration with potential language primitives (iterators?)
-
-The key part of this proposal that extends out in the future is the `mut` keyword. I could easily imagine object and list destructuring:
-
-```blight
-let (x, y, mut z)= <value>;
-```
-
-I could also easily imagine a future with mutable arguments to functions
-
-```blight
-fn foo(mut x: <type>) {
-	x = <value>;
-}
-```
-
-Other keywords do not make sense in my opinion.
+- Mutable variables
+- Variable destructuring
