@@ -136,14 +136,14 @@ The implementation logic of the type resolver is as follows:
    2. RHS is a boolean literal `false`, which is internally represented as the
       boolean `false`
    3. Since both sides are compile-time known, this expression evaluates to the
-      boolean literal `false`, internally represented by the float `false`
+      boolean literal `false`, internally represented by the boolean `false`
 1. Calculate RHS `(false || true)`
 1. LHS is a boolean literal `false`, which is internally represented as the
    boolean `false`
 1. RHS is a boolean literal `true`, which is internally represented as the
    boolean `true`
 1. Since both sides are compile-time known, this expression evaluates to the
-   boolean literal `true`, internally represented by the float `true`
+   boolean literal `true`, internally represented by the boolean `true`
 1. Since both sides are compile-time known, this can be evaluated at compile
    time.
 1. Assign boolean literal `true` to the variable `x`, which requires type `bool`
@@ -201,10 +201,8 @@ boolean. There's many options for how to do this:
 - `i32.fromBool(my_bool)`
 - `i32(my_bool)`
 
-I went with the first one because it is concise, and gives the same API to both
-floating point and integer types. It also opens up the possibility of
-`.to(string)` in the future, and so on as a practice of using `to` as the
-convention to convert something to another type.
+It also opens up the possibility of `.to(string)` in the future, and so on as a
+practice of using `to` as the convention to convert something to another type.
 
 ## `.to(same_type)`?
 
